@@ -1,5 +1,8 @@
+import tensorflow as tf
+from tensorflow.keras import layers, initializers
 
-class Discriminator(layers):
+class view_transform_layer(layers):
 
     def __init__(self, k):
-        super(Discriminator, self).__init__()
+        super(view_transform_layer, self).__init__()
+        self.
