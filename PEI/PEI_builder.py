@@ -19,13 +19,49 @@ def main():
     if not FLAGS.dataset:
         print("Please give correct dataset name. ")
 
+    root = r'C:\Users\User\Desktop\Aaron\College-level Applied Research\CASIA-B\GaitDatasetB-silh'
+    subjects = os.listdir(root)
+    variations = os.listdir(root + '\\' + subjects[0])
+    angles = os.listdir(root + '\\' + subjects[0] + '\\' + variations[0])
+
+    ourputdir = r'C:\Users\User\Desktop\Aaron\College-level Applied Research\PEI_output'
+
+    if not os.path.isdir(ourputdir):
+        os.mkdir(ourputdir)
+
+    for sub in subjects:
+        sub_dir = f'{ourputdir}\\{sub}'
+        if not os.path.isdir(sub_dir):
+            os.mkdir(sub_dir)
+        for var in variations:
+            var_dir = f'{sub_dir}\\{var}'
+            if not os.path.isdir(var_dir):
+                os.mkdir(var_dir)
+            for ang in angles:
+                ang_dir = f'{var_dir}\\{ang}'
+                if not os.path.isdir(ang_dir):
+                    os.mkdir(ang_dir)
+
+                images_dir = f'{root}\\{sub}\\{var}\\{ang}'
+                images_filename = os.listdir(images_dir)
+
+                images = np.array([cv2.imread(images_dir+'\\' + f, -1)
+                                  for f in images_filename])
+                period = Period_Detection(
+                    gallery=images, gallery_shape=images[0].shape)
+                for i, minmax in enumerate(Tk()):
+                    tk_image = images[np.where(
+                        (period > minmax[0]) & (period < minmax[1]))]
+                    gei = GEI(tk_image, (64, 64))
+                    cv2.imwrite(f'{ang_dir}\gei_{i}.png', gei)
+
 
 def Period_Detection(gallery: np.array, gallery_shape: tuple,
                      alpha=0.470, beta=0.961) -> np.array:
     '''
     From the early research, hip, knee, and ankle are 0.470, 0.715, 0.961 ratio from a human height.
     In this function, we caculate the mean of the ppl' moving(i.e. the region from hip to ankle. )
-    
+
     Input arg:
         gallery: np.array. A frame collection that taken from human's gait. 
         gallery_shape: tuple. The shape of each gallery image.
@@ -39,6 +75,10 @@ def Period_Detection(gallery: np.array, gallery_shape: tuple,
     Note:
         We assume the input gallery have been preprocessing into grayscale image, whcih 
         have also seperate the foreground and background. 
+
+    Reference:
+        Human Identification Using Temporal Information Preserving Gait Template
+        (https://ieeexplore.ieee.org/document/6112763)
 
     '''
     start = round(gallery_shape[0] * alpha)
