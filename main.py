@@ -4,7 +4,7 @@ Implement "Multi-Task GANs for View-Specific Feature Learning in Gait Recognitio
 '''
 
 def main():
-    
+    pass
     
 
 
