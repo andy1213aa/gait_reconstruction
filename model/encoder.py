@@ -37,10 +37,10 @@ class Encoder(tf.keras.Model):
 
         self.mean_pooling = layers.AveragePooling2D(name='mean_pooling')
 
-        self.f1 = layers.Dense(units=4096*128, name='F1')
+        self.f1 = layers.Dense(units=128, name='F1')
 
     def call(self, input):
-
+       
         x = self.conv1(input)
         x = self.bn_1(x)
         x = self.leakyReLU1(x)
@@ -58,5 +58,11 @@ class Encoder(tf.keras.Model):
         x = self.leakyReLU4(x)
 
         x = self.mean_pooling(x)
+        x = layers.Flatten(x)
         x = self.f1(x)
         return x
+
+    def model(self, inputsize: int, PEI_channel: int) -> tf.keras.models:
+        input = tf.keras.Input(shape=(inputsize[0], inputsize[1], PEI_channel), name='volume')
+
+        return tf.keras.models.Model(inputs=input, outputs = self.call(input))

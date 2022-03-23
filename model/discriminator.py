@@ -4,26 +4,27 @@ from tensorflow.keras import layers, initializers
 
 class Discriminator(tf.keras.Model):
 
-    def __init__(self, k: float):
+    def __init__(self, num_class: int, num_pei_channel: int, view_dim: int):
         super(Discriminator, self).__init__()
 
-        self.conv1 = layers.Conv2D(filters = 32,
+        self.conv1 = layers.Conv2D(filters=32,
                                    kernel_size=(7, 7), strides=2, padding='same',
                                    name='conv1',  use_bias=False)
         self.leakyReLU1 = layers.LeakyReLU(name='leakyReLU1')
-        self.conv2 = layers.Conv2D(filters = 64,
+        self.conv2 = layers.Conv2D(filters=64,
                                    kernel_size=(5, 5), strides=2, padding='same',
                                    name='conv2',  use_bias=False)
         self.leakyReLU2 = layers.LeakyReLU(name='leakyReLU2')
-        self.conv3 = layers.Conv2D(filters = 128,
+        self.conv3 = layers.Conv2D(filters=128,
                                    kernel_size=(5, 5), strides=2, padding='same',
                                    name='conv3',  use_bias=False)
         self.leakyReLU3 = layers.LeakyReLU(name='leakyReLU3')
-        self.conv4 = layers.Conv2D(filters = 256,
+        self.conv4 = layers.Conv2D(filters=256,
                                    kernel_size=(3, 3), strides=2, padding='same',
                                    name='conv4',  use_bias=False)
         self.leakyReLU4 = layers.LeakyReLU(name='leakyReLU4')
-        self.f1 = layers.Dense(units = 4096*k, name='F1')
+        self.f1 = layers.Dense(
+            units=num_class+num_pei_channel+view_dim, name='F1')
 
     def call(self, input):
 
@@ -34,13 +35,14 @@ class Discriminator(tf.keras.Model):
         x = self.conv3(x)
         x = self.leakyReLU3(x)
         x = self.conv4(x)
+        x = layers.Flatten(x)
         x = self.leakyReLU4(x)
         x = self.f1(x)
         return x
-    
 
     def model(self, inputsize: int) -> tf.keras.models:
-        volumeInput = tf.keras.Input(shape=(inputsize, inputsize, inputsize, 1), name='volume')
-        parameterInput = tf.keras.Input(shape=(1, 3), name='parameter')
+        input = tf.keras.Input(
+            shape=(inputsize[0], inputsize[1], 1), name='input_layer')
+        
 
-        return tf.keras.models.Model(inputs=[parameterInput, volumeInput], outputs = self.call([parameterInput, volumeInput]))
+        return tf.keras.models.Model(inputs=input, outputs=self.call(input))
