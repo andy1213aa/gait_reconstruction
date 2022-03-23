@@ -62,7 +62,7 @@ class Encoder(tf.keras.Model):
         x = self.f1(x)
         return x
 
-    def model(self, inputsize: int, PEI_channel: int) -> tf.keras.models:
-        input = tf.keras.Input(shape=(inputsize[0], inputsize[1], PEI_channel), name='volume')
+    def model(self, inputsize: int) -> tf.keras.models:
+        input = tf.keras.Input(shape=(inputsize[0], inputsize[1], 1), name='volume')
 
         return tf.keras.models.Model(inputs=input, outputs = self.call(input))
