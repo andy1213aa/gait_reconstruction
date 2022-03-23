@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras import layers, initializers
 
-class View_Angle_Classfier(layers.Layer):
+class View_Angle_Classfier(tf.keras.Model):
     
     def __init__(self, k):
         super(View_Angle_Classfier, self).__init__()
