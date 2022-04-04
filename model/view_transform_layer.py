@@ -3,9 +3,9 @@ from tensorflow.keras import layers, initializers
 
 class View_Transform_Layer(tf.keras.Model):
 
-    def __init__(self, k):
+    def __init__(self, view_number):
         super(View_Transform_Layer, self).__init__()
-        self.f1 = layers.Dense(units = k)
+        self.f1 = layers.Dense(units = view_number)
     
     def call(self, input, view_encode):
         x = input + self.f1(view_encode)

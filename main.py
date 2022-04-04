@@ -16,7 +16,7 @@ def main():
     def train_generator(real_data):
         with tf.GradientTape() as tape:
             view_specific_feature = encoder(real_data, training = True) 
-            view_transform_layer = 
+            view_transform_vector = 
 
             gFake_logit = dis([real_data[0], fake_data_by_random_parameter],training = True)
             gFake_loss = generator_loss(gFake_logit)
@@ -50,7 +50,8 @@ def main():
 
 
     d_optimizer = tf.keras.optimizers.RMSprop(lr=2e-4, decay=1e-4)
-    g_optimizer = tf.keras.optimizers.RMSprop(lr=5e-5, decay=1e-4) #also used in "encoder", "view_transform_layer" and "view_angle_classfier"
+    g_optimizer = tf.keras.optimizers.RMSprop(lr=5e-5, decay=1e-4) 
+    #also used in "encoder", "view_transform_layer" and "view_angle_classfier"
 
     iteration = 0
     while iteration < 10000:
