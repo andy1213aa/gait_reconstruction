@@ -8,7 +8,6 @@ def view_transform_encoder(angle1: int, angle2: int, view_dim: int) -> np.array:
 
     [0, 18, 36, 54, 72, 90, 108, 126, 144, 162, 180]
 
-    
     '''
 
     one_hot = np.zeros((view_dim))
