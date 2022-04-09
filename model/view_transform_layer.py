@@ -7,8 +7,8 @@ class View_Transform_Layer(tf.keras.Model):
         super(View_Transform_Layer, self).__init__()
         self.f1 = layers.Dense(units = view_number)
     
-    def call(self, input, view_encode):
-        x = input + self.f1(view_encode)
+    def call(self, gait_encode, view_onehot):
+        x = gait_encode + self.f1(view_onehot)
         return x
 
     def model(self, inputsize: int, ) -> tf.keras.models:

@@ -2,12 +2,16 @@
 Implement "Multi-Task GANs for View-Specific Feature Learning in Gait Recognition"
 
 '''
+from dis import dis
 import tensorflow as tf
 from model.encoder import Encoder
 from model.generator import Generator
 from model.discriminator import Discriminator
 from model.view_angle_classfier import View_Angle_Classfier
 from model.view_transform_layer import View_Transform_Layer
+from utlis import view_transform_encoder
+from utlis.loss_function import Generator_Loss   
+from utlis.loss_function import Discriminator_Loss
 
 
 def main():
@@ -16,30 +20,38 @@ def main():
     def train_generator(real_data):
         with tf.GradientTape() as tape:
             view_specific_feature = encoder(real_data, training = True) 
-            view_transform_vector = 
-
-            gFake_logit = dis([real_data[0], fake_data_by_random_parameter],training = True)
-            gFake_loss = generator_loss(gFake_logit)
-            disparate = 5e-1*tf.reduce_mean(tf.math.sqrt(tf.reduce_sum(tf.math.abs(fake_data_by_random_parameter-real_data[1])**2, axis=[1, 2, 3, 4])))
+            view_transform_vector = view_transform_layer(view_specific_feature, real_data['angle'])
+            concate_feature = tf.concate(view_specific_feature, view_transform_vector)
+            predict_silhouette = generator(concate_feature, training = True)
+            gFake_logit = discriminator([real_data['image_raw'], predict_silhouette],training = True)
+            gFake_loss = Generator_Loss(gFake_logit)
+            
+            disparate = tf.reduce_mean(tf.math.sqrt(tf.reduce_sum(tf.math.abs(predict_silhouette-real_data[1]), axis=[1, 2])))
             gLoss = gFake_loss + disparate
-        gradients = tape.gradient(gLoss, gen.trainable_variables)
-        genOptimizer.apply_gradients(zip(gradients, gen.trainable_variables))
-        return gFake_loss, gFake_logit, disparate
-    
+
+        gradients = tape.gradient(gLoss, generator_optimizer.trainable_variables)
+        generator_optimizer.apply_gradients(zip(gradients, generator.trainable_variables))
+        return gFake_loss
+
     @tf.function
     def train_discriminator(real_data):
      
         with tf.GradientTape() as t:
-
-            fake_data = gen(real_data[0],training = True)
-            real_logit = dis([real_data[0], real_data[1]] ,training = True)
-            fake_logit = dis([real_data[0], fake_data],training = True)
-            real_loss, fake_loss = discriminator_loss(real_logit, fake_logit)
+            
+            view_specific_feature = encoder(real_data, training = True) 
+            view_transform_vector = view_transform_layer(view_specific_feature, real_data['angle'])
+            concate_feature = tf.concate(view_specific_feature, view_transform_vector)
+            predict_silhouette = generator(concate_feature, training = True)
+            
+            real_logit = discriminator(real_data['iage_raw'] ,training = True)
+            fake_logit = discriminator(predict_silhouette, training = True)
+            
+            real_loss, fake_loss = Discriminator_Loss(real_logit, fake_logit)
             dLoss = (fake_loss + real_loss)
 
         D_grad = t.gradient(dLoss, dis.trainable_variables)
-        disOptimizer.apply_gradients(zip(D_grad, dis.trainable_variables))
-        return real_loss ,  fake_loss,  real_logit,fake_logit
+        discriminator_optimizer.apply_gradients(zip(D_grad, dis.trainable_variables))
+        return real_loss, fake_loss
 
 
     encoder = Encoder().model((64, 64, 1), 5)
@@ -49,14 +61,16 @@ def main():
     view_angle_classfier = View_Angle_Classfier(11).model(128)
 
 
-    d_optimizer = tf.keras.optimizers.RMSprop(lr=2e-4, decay=1e-4)
-    g_optimizer = tf.keras.optimizers.RMSprop(lr=5e-5, decay=1e-4) 
+    discriminator_optimizer = tf.keras.optimizers.RMSprop(lr=2e-4, decay=1e-4)
+    generator_optimizer = tf.keras.optimizers.RMSprop(lr=5e-5, decay=1e-4) 
     #also used in "encoder", "view_transform_layer" and "view_angle_classfier"
 
     iteration = 0
     while iteration < 10000:
         for step, real_data in enumerate(training_batch):
-            train_generator(real_data)
+            gen_fake_loss = train_generator(real_data)
+            dis_real_loss = train_discriminator(real_data)
+
         iteration += 1
 
 

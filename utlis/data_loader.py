@@ -48,15 +48,15 @@ class CasiaB(GenericTFLoader):
             features={feature: tf.io.FixedLenFeature([], dtype) for feature, dtype in self._config('features')
             }
         )
-        data = features['image']
-     
-        data = tf.io.decode_raw(data, tf.float32)
-        
+        img = features['image']
+
+        img = tf.io.decode_raw(data, tf.float32)
+        img = tf.reshape(data, )
         
         data = (data - mini) / (maxi-mini)
         data = data*2 - 1 #rescale the value range to [-1, 1].
      
-        data = tf.reshape(data, [dataSetConfig['height'], dataSetConfig['width'], dataSetConfig['length'], 1])
+        
         P1 = tf.reshape(P1, [1])
         P2 = tf.reshape(P2, [1])
         P3 = tf.reshape(P3, [1])
