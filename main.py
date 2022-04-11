@@ -18,7 +18,7 @@ def main():
 
     @tf.function
     def train_generator(real_data):
-        with tf.GradientTape() as tape:
+        with tf.GradientTape(persistent=True) as tape:
             view_specific_feature = encoder(real_data, training = True) 
             view_transform_vector = view_transform_layer(view_specific_feature, real_data['angle'])
             concate_feature = tf.concate(view_specific_feature, view_transform_vector)
@@ -29,8 +29,15 @@ def main():
             disparate = tf.reduce_mean(tf.math.sqrt(tf.reduce_sum(tf.math.abs(predict_silhouette-real_data[1]), axis=[1, 2])))
             gLoss = gFake_loss + disparate
 
-        gradients = tape.gradient(gLoss, generator_optimizer.trainable_variables)
-        generator_optimizer.apply_gradients(zip(gradients, generator.trainable_variables))
+        encoder_gradients = tape.gradient(gLoss, encoder_optimizer.trainable_variables)
+        view_transform_layer_gradients = tape.gradient(gLoss, view_transform_layer_optimizer.trainable_variables)
+        generator_gradients = tape.gradient(gLoss, generator_optimizer.trainable_variables)
+        
+
+        encoder_optimizer.apply_gradients(zip(encoder_gradients, encoder.trainable_variables))
+        view_transform_layer_optimizer.apply_gradients(zip(view_transform_layer_gradients, view_transform_layer.trainable_variables))
+        generator_optimizer.apply_gradients(zip(generator_gradients, generator.trainable_variables))
+
         return gFake_loss
 
     @tf.function
@@ -63,6 +70,9 @@ def main():
 
     discriminator_optimizer = tf.keras.optimizers.RMSprop(lr=2e-4, decay=1e-4)
     generator_optimizer = tf.keras.optimizers.RMSprop(lr=5e-5, decay=1e-4) 
+    encoder_optimizer = tf.keras.optimizers.RMSprop(lr=5e-5, decay=1e-4) 
+    view_transform_layer_optimizer  = tf.keras.optimizers.RMSprop(lr=5e-5, decay=1e-4) 
+
     #also used in "encoder", "view_transform_layer" and "view_angle_classfier"
 
     iteration = 0
@@ -70,7 +80,8 @@ def main():
         for step, real_data in enumerate(training_batch):
             gen_fake_loss = train_generator(real_data)
             dis_real_loss = train_discriminator(real_data)
-
+        
+        
         iteration += 1
 
 
