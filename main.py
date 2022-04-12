@@ -12,8 +12,8 @@ from model.view_transform_layer import View_Transform_Layer
 from utlis import view_transform_encoder
 from utlis.loss_function import Generator_Loss   
 from utlis.loss_function import Discriminator_Loss
-
-
+from utlis.data_loader import OU_MVLP
+from utlis.config.data_info import OU_MVLP_train
 def main():
 
     @tf.function
@@ -74,6 +74,8 @@ def main():
     view_transform_layer_optimizer  = tf.keras.optimizers.RMSprop(lr=5e-5, decay=1e-4) 
 
     #also used in "encoder", "view_transform_layer" and "view_angle_classfier"
+    
+    training_batch = OU_MVLP(OU_MVLP_train).read()
 
     iteration = 0
     while iteration < 10000:
