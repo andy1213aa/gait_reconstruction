@@ -4,7 +4,8 @@ from tensorflow.keras import layers, initializers
 
 class Discriminator(tf.keras.Model):
 
-    def __init__(self, num_class: int, num_pei_channel: int, view_dim: int):
+    # def __init__(self, num_class: int, num_pei_channel: int, view_dim: int):
+    def __init__(self):
         super(Discriminator, self).__init__()
 
         self.conv1 = layers.Conv2D(filters=32,
@@ -23,8 +24,9 @@ class Discriminator(tf.keras.Model):
                                    kernel_size=(3, 3), strides=2, padding='same',
                                    name='conv4',  use_bias=False)
         self.leakyReLU4 = layers.LeakyReLU(name='leakyReLU4')
-        self.f1 = layers.Dense(
-            units=num_class+num_pei_channel+view_dim, name='F1')
+        # self.f1 = layers.Dense(
+        #     units=num_class+num_pei_channel+view_dim, name='F1')
+        self.f1 = layers.Dense(units=1, name='F1')
 
     def call(self, input):
 
@@ -43,6 +45,5 @@ class Discriminator(tf.keras.Model):
     def model(self, inputsize: int) -> tf.keras.models:
         input = tf.keras.Input(
             shape=(inputsize[0], inputsize[1], 1), name='input_layer')
-        
 
         return tf.keras.models.Model(inputs=input, outputs=self.call(input))

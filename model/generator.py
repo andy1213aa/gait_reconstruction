@@ -53,7 +53,7 @@ class Generator(Model):
         x = self.leakyReLU4(x)
         x = self.conv5(x)
         x = self.tanh(x)
-        x = layers.Reshape(self.output_shape[0], self.output_shape[1])
+        x = layers.Reshape(self.output_shape[0], self.output_shape[1], 1)
         return x
 
     def model(self) -> tf.keras.models.Model:

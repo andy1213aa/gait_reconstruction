@@ -58,7 +58,7 @@ class Encoder(tf.keras.Model):
         x = self.leakyReLU4(x)
 
         x = self.mean_pooling(x)
-        x = layers.Flatten(x)
+        x = layers.Flatten()(x)
         x = self.f1(x)
         return x
 

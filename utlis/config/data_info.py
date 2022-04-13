@@ -1,8 +1,15 @@
 import tensorflow as tf
 
+training_info ={
+    'save_model':{
+        'logdir': r'C:\Users\User\Desktop\Aaron\College-level Applied Research\log\gait_training_log'
+    }
+}
+
+
 casia_B_train = {
     "feature": {
-        "angle": tf.foat32,
+        "angle": tf.float32,
         "subject": tf.float32,
         "data_row": tf.string
     },
@@ -32,7 +39,8 @@ OU_MVLP_train = {
     "resolution": {
         "height": 64,
         "width": 64,
-        "channel": None
+        "channel": 1, 
+        "angle_nums": 14
     },
 
     "training_info": {
