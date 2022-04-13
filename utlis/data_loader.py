@@ -96,6 +96,7 @@ class OU_MVLP(GenericTFLoader):
             onehot_list[random_angle[1]]
 
         images = tf.io.decode_raw(images, tf.float32)
+        images = (images-127.5)/127.5
         images = tf.reshape(images, [tf.shape(angles)[0], 128, 88, 3])
 
         random_select_image_1 = tf.image.resize(tf.image.rgb_to_grayscale(images[random_angle[0]]), [

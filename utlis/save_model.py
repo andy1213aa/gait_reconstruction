@@ -58,7 +58,7 @@ class Save_Model(tf.keras.callbacks.Callback):
                  f'./log/{startingDate}/utlis')
 
         copyfile(
-            r'C:\Users\User\Desktop\Aaron\College-level Applied Research\gait_recognition\main.py', f'./log/main.py')
+            r'C:\Users\User\Desktop\Aaron\College-level Applied Research\gait_recognition\main.py', f'./log/{startingDate}/main.py')
 
     def save(self):
         if self.save_weights_only:
