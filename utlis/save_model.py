@@ -3,7 +3,7 @@ import numpy as np
 import datetime
 import os
 from shutil import copytree, copyfile
-
+from pathlib import Path
 
 class Save_Model(tf.keras.callbacks.Callback):
     def __init__(self, encoder, view_transform_layer, gen, dis, mode='min', save_weights_only=False):
@@ -52,13 +52,14 @@ class Save_Model(tf.keras.callbacks.Callback):
         if not os.path.isdir(f"./log/{startingDate}/dis/"):
             os.mkdir(f"./log/{startingDate}/dis/")
 
-        copytree(r'C:\Users\User\Desktop\Aaron\College-level Applied Research\gait_recognition\model',
+        work_dir = Path(os.path.abspath('')).parents[0]
+        copytree(f'{work_dir}/model',
                  f'./log/{startingDate}/model')
-        copytree(r'C:\Users\User\Desktop\Aaron\College-level Applied Research\gait_recognition\utlis',
+        copytree(f'{work_dir}/utlis',
                  f'./log/{startingDate}/utlis')
 
         copyfile(
-            r'C:\Users\User\Desktop\Aaron\College-level Applied Research\gait_recognition\main.py', f'./log/{startingDate}/main.py')
+            f'{work_dir}/main.py', f'./log/{startingDate}/main.py')
 
     def save(self):
         if self.save_weights_only:
