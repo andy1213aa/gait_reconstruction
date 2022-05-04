@@ -35,7 +35,7 @@ def main():
             fake_loss = Generator_Loss(fake_logit)
 
             disparate = tf.reduce_mean(tf.math.sqrt(tf.reduce_sum(
-                tf.math.abs(predict_silhouette-image_ang2), axis=[1, 2, 3]))) * 1e-2
+                tf.math.abs(predict_silhouette-image_ang2), axis=[1, 2, 3]))) * 4e-2
             gen_total_loss = fake_loss + disparate
 
         encoder_gradients = tape.gradient(
@@ -56,7 +56,7 @@ def main():
         generator_optimizer.apply_gradients(
             zip(generator_gradients, generator.trainable_variables))
 
-        return fake_loss, disparate
+        return gen_total_loss, disparate
 
     @tf.function
     def train_discriminator(subject, angle, image_ang1, image_ang2):
@@ -114,7 +114,7 @@ def main():
             print(f'Epoch: {iteration:6} Batch: {step:3} Disparate:{disparate:4.5} G_loss: {gen_fake_loss:4.5} D_real_loss: {dis_real_loss:4.5} D_fake_loss: {dis_fake_loss:4.5}')
         iteration += 1
 
-        if iteration % 10 == 0:
+        if iteration % 1 == 0:
             save_model.save()
 
 

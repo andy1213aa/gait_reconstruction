@@ -27,7 +27,7 @@ def main():
             view_specific_feature = encoder(image_ang1, training=True)
 
             view_transform_vector = view_transform_layer(
-                [view_specific_feature, angle], training=True)
+                [view_specific_feature, angle])
 
             predict_silhouette = generator(
                 view_transform_vector, training=True)
@@ -35,7 +35,7 @@ def main():
             fake_loss = Generator_Loss(fake_logit)
 
             disparate = tf.reduce_mean(tf.math.sqrt(tf.reduce_sum(
-                tf.math.abs(predict_silhouette-image_ang2), axis=[1, 2, 3]))) * 1e-2
+                tf.math.abs(predict_silhouette-image_ang2), axis=[1, 2, 3]))) * 1e-1
             gen_total_loss = fake_loss + disparate
 
         encoder_gradients = tape.gradient(
@@ -56,7 +56,7 @@ def main():
         generator_optimizer.apply_gradients(
             zip(generator_gradients, generator.trainable_variables))
 
-        return fake_loss, disparate
+        return gen_total_loss, disparate
 
     @tf.function
     def train_discriminator(subject, angle, image_ang1, image_ang2):
@@ -90,11 +90,11 @@ def main():
     discriminator = Discriminator().model((64, 64))
     view_angle_classfier = View_Angle_Classfier(angle_num).model(128)
 
-    discriminator_optimizer = tf.keras.optimizers.RMSprop(lr=2e-4, decay=1e-4)
-    generator_optimizer = tf.keras.optimizers.RMSprop(lr=5e-5, decay=1e-4)
-    encoder_optimizer = tf.keras.optimizers.RMSprop(lr=5e-5, decay=1e-4)
-    view_transform_layer_optimizer = tf.keras.optimizers.RMSprop(
-        lr=5e-5, decay=1e-4)
+    discriminator_optimizer = tf.keras.optimizers.Adam(lr=2e-5, decay=1e-4)
+    generator_optimizer = tf.keras.optimizers.Adam(lr=5e-6, decay=1e-4)
+    encoder_optimizer = tf.keras.optimizers.Adam(lr=5e-6, decay=1e-4)
+    view_transform_layer_optimizer = tf.keras.optimizers.Adam(
+        lr=5e-6, decay=1e-4)
 
     training_batch = create_training_data('OU_MVLP')
     save_model = Save_Model(
@@ -114,7 +114,7 @@ def main():
             print(f'Epoch: {iteration:6} Batch: {step:3} Disparate:{disparate:4.5} G_loss: {gen_fake_loss:4.5} D_real_loss: {dis_real_loss:4.5} D_fake_loss: {dis_fake_loss:4.5}')
         iteration += 1
 
-        if iteration % 10 == 0:
+        if iteration % 1 == 0:
             save_model.save()
 
 

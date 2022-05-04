@@ -44,7 +44,7 @@ OU_MVLP_train = {
     },
 
     "training_info": {
-        "tfrecord_path": r'C:\Users\andy1\Desktop\650S100\College-level Applied Research\gait_recognition\OU_MVLP_GEI_TFRECORD\GEI_00_float32.tfrecords',
+        "tfrecord_path": r'C:\Users\User\Desktop\Aaron\College-level Applied Research\gait_recognition\OU_MVLP_GEI_TFRECORD\GEI_00_float32.tfrecords',
         "data_num": 10300,
         "batch_size": 64,
         "shuffle": True
