@@ -53,6 +53,7 @@ class Save_Model(tf.keras.callbacks.Callback):
             os.mkdir(f"./log/{startingDate}/dis/")
 
         work_dir = Path(os.path.abspath('')).parents[0]
+        print('work_dir')
         copytree(f'{work_dir}/model',
                  f'./log/{startingDate}/model')
         copytree(f'{work_dir}/utlis',
