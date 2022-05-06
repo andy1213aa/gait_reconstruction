@@ -2,8 +2,7 @@
 Implement "Multi-Task GANs for View-Specific Feature Learning in Gait Recognition"
 
 '''
-
-import numpy as np
+from dis import dis
 import tensorflow as tf
 from model.encoder import Encoder
 from model.generator import Generator
@@ -83,24 +82,13 @@ def main():
             zip(D_grad, discriminator.trainable_variables))
         return real_loss, fake_loss
 
-    def combineImages(images, col=4, row=4):
-        images = (images+1)/2
-        images = images.numpy()
-        b, h, w, _ = images.shape
-        imagesCombine = np.zeros(shape=(h*col, w*row, 3))
-        for y in range(col):
-            for x in range(row):
-                imagesCombine[y*h:(y+1)*h, x*w:(x+1)*w] = images[x+y*row]
-        return imagesCombine
-
-
     angle_num = OU_MVLP_train['resolution']['angle_nums']
 
     encoder = Encoder().model((64, 64))
     view_transform_layer = View_Transform_Layer(128).model(128, angle_num)
     generator = Generator(128, angle_num, (64, 64)).model()
     discriminator = Discriminator().model((64, 64))
-    # view_angle_classfier = View_Angle_Classfier(angle_num).model(128)
+    view_angle_classfier = View_Angle_Classfier(angle_num).model(128)
 
     discriminator_optimizer = tf.keras.optimizers.RMSprop(lr=2e-4, decay=1e-4)
     generator_optimizer = tf.keras.optimizers.RMSprop(lr=5e-5, decay=1e-4)
@@ -112,42 +100,23 @@ def main():
     save_model = Save_Model(
         encoder, view_transform_layer, generator, discriminator)
 
-    summary_writer = tf.summary.create_file_writer(f'./log/{save_model.startingDate}')
     iteration = 0
     while iteration < 10000:
         for step, batch in enumerate(training_batch):
 
             batch_subjects, batch_angles, batch_images_ang1, batch_images_ang2 = batch
+            gen_fake_loss, disparate = train_generator(
+                batch_subjects, batch_angles, batch_images_ang1, batch_images_ang2)
 
             dis_real_loss, dis_fake_loss = train_discriminator(
                 batch_subjects, batch_angles, batch_images_ang1, batch_images_ang2)
 
-            gen_fake_loss, disparate = train_generator(
-                batch_subjects, batch_angles, batch_images_ang1, batch_images_ang2)
-
-            with summary_writer.as_default():
-                tf.summary.scalar('disRealLoss', dis_real_loss, discriminator_optimizer.iterations)
-                tf.summary.scalar('disFakeLoss', dis_fake_loss, discriminator_optimizer.iterations)
-
-                tf.summary.scalar('disLoss', dis_real_loss + dis_fake_loss, discriminator_optimizer.iterations)
-                tf.summary.scalar('genLoss', gen_fake_loss, generator_optimizer.iterations)
-                tf.summary.scalar('disparate', disparate, generator_optimizer.iterations)
-
-        print(f'Epoch: {iteration:6} Batch: {step:3} Disparate:{disparate:4.5} G_loss: {gen_fake_loss:4.5} D_real_loss: {dis_real_loss:4.5} D_fake_loss: {dis_fake_loss:4.5}')
+            print(f'Epoch: {iteration:6} Batch: {step:3} Disparate:{disparate:4.5} G_loss: {gen_fake_loss:4.5} D_real_loss: {dis_real_loss:4.5} D_fake_loss: {dis_fake_loss:4.5}')
         iteration += 1
 
-        if generator_optimizer.iterations % 10 == 0:
-            encode_angle1 = encoder(batch_images_ang1, training = False)
-            view_transform = view_transform_layer([encode_angle1, batch_angles])
-            predict_ang2 = generator(view_transform)
-            rawImage = combineImages(batch_images_ang2)
-            fakeImage = combineImages(predict_ang2)
-            with summary_writer.as_default():
-                tf.summary.image('rawImage', [rawImage], step=generator_optimizer.iterations)
-                tf.summary.image('fakeImage', [fakeImage], step=generator_optimizer.iterations)
+        if iteration % 10 == 0:
             save_model.save()
-        
-            
+
 
 if __name__ == '__main__':
     main()

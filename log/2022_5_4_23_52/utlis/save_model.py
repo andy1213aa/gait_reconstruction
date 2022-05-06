@@ -32,7 +32,7 @@ class Save_Model(tf.keras.callbacks.Callback):
         startingTime = datetime.datetime.now()
         startingDate = f'{startingTime.year}_{startingTime.month}_{startingTime.day}' + \
             '_'+f'{startingTime.hour}_{startingTime.minute}'
-        self.startingDate = startingDate #log starting date
+
         os.mkdir(f"./log/{startingDate}")
 
         self.encoderDir = f"./log/{startingDate}/encoder/"
